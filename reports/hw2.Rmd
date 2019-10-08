@@ -1,0 +1,29 @@
+---
+title: "HW 2"
+author: "Rita Sefraoui Tahiri, Simon Fornerod, David Pitteloud, Leonard Philippossian, Alexandre Schroeter"
+date: "08/10/2019"
+output: html_document
+---
+
+## Problem 1: Fizz Buzz
+```{r}
+
+```
+
+## Problem 2: Map
+```{r}
+
+```
+
+
+## Problem 3: 3-D Random Walk
+
+```{r}
+
+```
+
+
+## Problem 4: Portfolio construction
+```{r}
+
+```
