@@ -5,8 +5,24 @@ date: "08/10/2019"
 output: html_document
 ---
 
-## Problem 1: Fizz Buzz
+## Problem 1: Fuzz Bizz
 ```{r}
+i <- 1
+df <- data.frame()
+while (i<=1000)  {
+  if ((i%%5==0) & (i%%3==0)) {
+    df <- rbind(df,c("Fuzzbizz"))
+  } else if (i%%5==0){
+    df <- rbind(df,c("Bizz"))
+  } else if (i%%3==0) {
+    df <- rbind(df,c("Fuzz"))
+  } else {
+    df <- rbind(df,c(i))
+  }
+  i <- i+1
+}
+print(df)
+
 
 ```
 
