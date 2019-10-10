@@ -332,3 +332,19 @@ return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))]
 
 ```
 
+
+```{r, cache=TRUE}
+
+return.stock <- data.frame(return.stock)
+
+
+mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
+do.call(cbind.data.frame,Map(expand.grid,teacher=teachers,students=students))
+
+
+sd.return <- apply(return.stock,2,function(x) sd(x))
+
+
+cov(return.stock)
+
+```
