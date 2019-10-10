@@ -26,8 +26,54 @@ print(df)
 
 ```
 
+
+
 ## Problem 2: Map
 ```{r}
+library(rworldmap)
+library(rworldxtra)
+library(ggmap)
+library(tidyverse)
+library(magrittr)
+library(ptdspkg)
+library(mapproj)
+library(plotly)
+
+cities <- tibble(
+  name = c("zurich", "bern", "lausanne", "geneva", "basel"),
+  language = c("german", "german", "french", "french", "german"),
+  latitude = c(47.369019, 46.948002, 46.519630, 46.204391, 47.559608),
+  longitude = c(8.538030, 7.448130, 6.632130, 6.143158, 7.580610)
+)
+
+get_volume("zurich", delay = 1)
+get_volume("bern", delay = 1)
+get_volume("lausanne", delay = 1)
+get_volume("geneva", delay = 1)
+get_volume("basel", delay = 1)
+cities <- cities %>%
+  mutate(volume = sapply(name, get_volume))
+
+typeof(cities$volume)
+world_map <- getMap(resolution = "high")
+
+which(sapply(1:243, function(x) world_map@polygons[[x]]@ID) == "Switzerland")
+
+switzerland <- world_map@polygons[[40]]@Polygons[[1]]@coords %>% as_tibble()
+
+
+
+ggplot() +
+geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
+geom_point( data= cities, aes(x=longitude, y=latitude, size=volume, color=language))+
+scale_size_continuous(range=c(1,12)) +
+coord_map()+
+theme(panel.background = element_rect(fill= NA, colour="darkgrey",         linetype="solid"))+
+xlab("longitude")+
+ylab("latitude")+
+labs(title = "Volume of real estate market in Switzerland",
+    subtitle = "Updated on the")
+
 
 ```
 
