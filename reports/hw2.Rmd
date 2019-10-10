@@ -290,6 +290,45 @@ brownian.motion(n = 20, xlim = c(-20, 20), ylim = c(-20, 20))
 
 
 ## Problem 4: Portfolio construction
-```{r}
+```{r, cache=TRUE}
+library(quantmod)
+library(rvest)
+sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+
+#Extract ticker
+
+sp500 %>% 
+  html_nodes(".text") %>% 
+  html_text() -> ticker_sp500
+
+SP500_symbol <- ticker_sp500[ticker_sp500!= "reports"]
+SP500_symbol <- SP500_symbol[1:504]
+
+# Replace "." by "-"
+SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
+
+# Specify timing
+tot_length <- 3 * 365
+today <- Sys.Date()
+seq_three_years <- seq(today,by=-1,length.out=tot_length)
+three_year_ago <- seq_three_years[tot_length]
+
+# Retrieve data for all stocks
+
+return.stock<- NULL
+
+for (i in 1:length(SP500_symbol)){
+stock_price<-NULL
+getSymbols(SP500_symbol[i],from=three_year_ago,to=today)
+stock_price <- ClCl(get(SP500_symbol[i]))
+stock_price <- stock_price[-1]
+colnames(stock_price)<-SP500_symbol[i]
+return.stock <- cbind(return.stock, stock_price)
+remove(list= SP500_symbol[i])
+}
+
+#remove columns that contains NA
+return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
 
 ```
+
