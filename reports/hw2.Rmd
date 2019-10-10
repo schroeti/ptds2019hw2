@@ -35,6 +35,8 @@ print(df)
 ## Problem 3: 3-D Random Walk
 
 ```{r}
+
+#load libraries 
 library(tidytext)
 library(readxl)
 library(tibble)
@@ -42,17 +44,25 @@ library(ggplot2)
 library(dplyr)
 
 
+##Question a
 
 ###OPTION 1, simpler without time column but somehow less elegant
+
+#number of iterations
 B <- 10^4
+#set seed to have reproductible results
 set.seed(1982)
 
+#Create a list of length B of random nombers uniformely distributed between 0 and 1
 Ut <- runif(B)
 
+#Xtibble is the database of the vector X. The columns represent the the dimension we are moving on, namely x, y or z
 Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0)
+
 
 tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
 
+##Function that compares a number from Ut to the treshold to determine a direction to move on. 
 ft<-function(u, a){
  { if(u<=a[1]){
     direction<- c(1,0,0)}else if(u>a[1]&& u<=a[2]) {
@@ -72,13 +82,13 @@ ft<-function(u, a){
 
 #
 
-
+# For each iteration, we take the position at the iteration -1 and ad the new direction
 for(i in 1:B+1){ 
      if(i==1){Xtibble[i]==c(0,0,0)}else{
        Xtibble[i,]=Xtibble[i-1,]+ft(Ut[i-1],tresholds)}
    }
 
-
+#We get the final position at the iteration B: We need to use B+1 because we started with iteration 0
 Xtibble[B+1,]
 
 ###OPTION 2,  time column 
@@ -87,7 +97,8 @@ set.seed(1982)
 
 Ut <- runif(B)
 
-Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0, time=0:B)
+#Same as before but with a column to show the iterations 
+Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0, iteration=0:B)
 
 tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
 
@@ -108,7 +119,7 @@ for(i in 1:B+1){
   Xtibble[i,j]=Xtibble[i-1,j]+ft(Ut[i-1],tresholds)[j]}
 }
 
-print(Xtibble[Xtibble$time==B, ])
+print(Xtibble[Xtibble$iteration==B, ])
 
 ```
 
