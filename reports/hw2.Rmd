@@ -2,11 +2,48 @@
 title: "HW 2"
 author: "Rita Sefraoui Tahiri, Simon Fornerod, David Pitteloud, Leonard Philippossian, Alexandre Schroeter"
 date: "08/10/2019"
-output: html_document
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    toc_depth: 3
 ---
 
-## Problem 1: Fuzz Bizz
-```{r}
+# Instructions : 
+
+* Install the package rmdformats by running :
+install.packages("rmdformats")
+
+* Make sure to install all the packages necessary, including :
+ggmap, rworldmap, rworldxtra, magriits, ptsdpkg, mapproj, plotly, tidytext, readxl, plot3D, animation and knitr
+
+* The program is slow to run because of the management of a large number of data and of the utilisation of a web scraping method, you can however access the report in its compiled html format in the folder "reports"
+
+
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
+
+library("rmdformats")
+library(rworldmap)
+library(rworldxtra)
+library(ggmap)
+library(tidyverse)
+library(magrittr)
+library(ptdspkg)
+library(mapproj)
+library(plotly)
+library(tidytext)
+library(readxl)
+library(tibble)
+library(ggplot2)
+library(dplyr)
+library(plot3D)
+library(animation)
+library(knitr)
+
+```
+# Problem 1: Fuzz Bizz
+
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
+
 i <- 1
 df <- data.frame()
 while (i<=1000)  {
@@ -23,21 +60,12 @@ while (i<=1000)  {
 }
 print(df)
 
-
 ```
 
 
+# Problem 2: Map
 
-## Problem 2: Map
-```{r}
-library(rworldmap)
-library(rworldxtra)
-library(ggmap)
-library(tidyverse)
-library(magrittr)
-library(ptdspkg)
-library(mapproj)
-library(plotly)
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
 
 cities <- tibble(
   name = c("zurich", "bern", "lausanne", "geneva", "basel"),
@@ -61,8 +89,6 @@ which(sapply(1:243, function(x) world_map@polygons[[x]]@ID) == "Switzerland")
 
 switzerland <- world_map@polygons[[40]]@Polygons[[1]]@coords %>% as_tibble()
 
-
-
 ggplot() +
   geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
   geom_point( data= cities, aes(x=longitude, y=latitude, size=volume, color=language))+
@@ -81,119 +107,106 @@ ggplot() +
 ```
 
 
-## Problem 3: 3-D Random Walk
+# Problem 3: 3-D Random Walk
 
-```{r}
+## Question a :  
 
-#load libraries 
-library(tidytext)
-library(readxl)
-library(tibble)
-library(ggplot2)
-library(dplyr)
-library(plot3D)
-library(animation)
+We represent a random walk with the package plot 3D. In red is the departure point and in blue is the arrival point of the random walk. In this question we use 10000 iterations. 
 
+
+```{r, warning = FALSE, message = FALSE, echo=FALSE}
 
 ##Question a
 
-###OPTION 1, simpler without time column but somehow less elegant
+###OPTION 2,  time column 
 
 #number of iterations
 B <- 10^4
-#set seed to have reproductible results
+#set seed to have reproductible results 
 set.seed(1982)
-
-#Create a list of length B of random nombers uniformely distributed between 0 and 1
+# create a vector with B numbers that are random. Uniformely distributed between 0 and 1
 Ut <- runif(B)
 
-#Xtibble is the database of the vector X. The columns represent the the dimension we are moving on, namely x, y or z
-Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0)
+#Create a dataframe with the dimensions x, y and z for the 3D representation and a column for the iteration. 
 
+Xtibble<- tibble ( spaceX=0, spaceY=0, spaceZ=0, iteration=0:B )
 
-tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
+#Show tresholds 
+tresholds<-c( 1/6 , 2/6 , 3/6 , 4/6 , 5/6 , 6/6 )
 
-##Function that compares a number from Ut to the treshold to determine a direction to move on. 
+#Function that compares the random number from u in the line to the treshold to set the direction 
 ft<-function(u, a){
- { if(u<=a[1]){
-    direction<- c(1,0,0)}else if(u>a[1]&& u<=a[2]) {
-      direction<-c(-1,0,0)}else if (u>a[2]&& u<=a[3] ){
-        direction<- c(0,1,0)}else if (u>a[3]&& u<=a[4] ){
-          direction<- c(0,-1,0)}else if (u>a[4]&& u<=a[5] ){
-            direction<- c(0,0,1)}else{
-              direction<-c(0,0,-1)} }
- 
-  return(direction)
-}
+  { if ( u <= a[1] ) {
+    direction <- c( 1 , 0 , 0 ) } else if ( u>a[1]&& u<=a[2] ) {
+      direction <-c( -1 , 0 , 0 ) } else if ( u>a[2]&& u<=a[3] ){
+        direction <- c( 0 , 1 , 0 ) } else if ( u>a[3]&& u<=a[4] ){
+          direction <- c( 0 , -1 , 0 ) } else if ( u>a[4]&& u<=a[5] ){
+            direction <- c( 0 , 0 , 1 ) } else {
+              direction <-c( 0 , 0 , -1 )} }
   
-#for(i in 2:B){ 
- # for(j in 1:3){
-  #  Xtibble[i,j]=Xtibble[i-1,j]+ft(Ut[i-1],tresholds)[j]}
-#}
-
-#
-
-# For each iteration, we take the position at the iteration -1 and ad the new direction
-for(i in 1:B+1){ 
-     if(i==1){Xtibble[i]==c(0,0,0)}else{
-       Xtibble[i,]=Xtibble[i-1,]+ft(Ut[i-1],tresholds)}
-   }
-
-#We get the final position at the iteration B: We need to use B+1 because we started with iteration 0
-Xtibble[B+1,]
-
-###OPTION 2,  time column 
-B <- 10^4
-set.seed(1982)
-
-Ut <- runif(B)
-
-#Same as before but with a column to show the iterations 
-Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0, iteration=0:B)
-
-tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
-
-ft<-function(u, a){
-  { if(u<=a[1]){
-    direction<- c(1,0,0)}else if(u>a[1]&& u<=a[2]) {
-      direction<-c(-1,0,0)}else if (u>a[2]&& u<=a[3] ){
-        direction<- c(0,1,0)}else if (u>a[3]&& u<=a[4] ){
-          direction<- c(0,-1,0)}else if (u>a[4]&& u<=a[5] ){
-            direction<- c(0,0,1)}else{
-              direction<-c(0,0,-1)} }
-  
-  return(direction)
+  return( direction )
 }
 
-for(i in 1:B+1){ 
-  for(j in 1:3){
-  Xtibble[i,j]=Xtibble[i-1,j]+ft(Ut[i-1],tresholds)[j]}
+#We go to B+1 because we start the iterations at 0
+for( i in 1:B+1 ) { 
+  for( j in 1:3 ) {
+  Xtibble[ i , j ] = Xtibble[ i-1 , j ] + ft( Ut[ i-1 ] , tresholds )[ j ]}
 }
+```
 
-print(Xtibble[Xtibble$iteration==B, ])
+```{r}
+print( Xtibble[ Xtibble$iteration == B , ])
 
 ##Showing departure and arrival, 3D 
 #Still needs title and beautifying :) 
-pmat<-scatter3D(Xtibble$spaceX, Xtibble$spaceY, Xtibble$spaceZ,phi = 0, bty = "g", type = "b",
-          ticktype = "detailed", pch = 10, 
-          cex = c(0.1, 0.1, 0.1), col="black"
-          )
+pmat <- scatter3D ( Xtibble$spaceX ,
+                    Xtibble$spaceY ,
+                    Xtibble$spaceZ ,
+                    phi = 0 ,
+                    bty = "g" ,
+                    type = "b" ,
+                    ticktype = "detailed" ,
+                    pch = 10 , 
+                    cex = c(0.1, 0.1, 0.1) , 
+                    col="black" ,
+                    xlab = " " ,
+                    ylab = " " ,
+                    zlab=" " ,
+                    main = "Random walk, 10 000 iterations " )
 
-points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
-               c(Xtibble$spaceY[1],Xtibble$spaceY[B+1]),
-               c(Xtibble$spaceZ[1],Xtibble$spaceZ[B+1]),
-               pmat =pmat ),  col = c("green","red"), pch = 16)
+points( trans3d( c( Xtibble$spaceX[ 1 ] ,
+                    Xtibble$spaceX[ B+1 ] ) , 
+                 c( Xtibble$spaceY[ 1 ] , 
+                    Xtibble$spaceY[ B+1 ] ) , 
+                 c( Xtibble$spaceZ[ 1 ] , 
+                    Xtibble$spaceZ[ B+1 ] ) ,
+               pmat = pmat ) ,
+        col = c( "red" , "blue" ), 
+        pch = 16)
+```
 
+## Question b :
+
+<p align='justify'>We now do 100 000 iterations. We also modify the tresholds slightly. Ths modification will tweak the directions. Indeed, instead of having the same chance to go up, down, left or right, here there are slightly more chances to go up on the z dimension. </p>
+
+
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
 ##part B 
-B <- 10^5
-set.seed(2000)
 
-Ut <- runif(B)
+B <- 10^5
+
+set.seed( 2000 )
+
+Ut <- runif( B )
 
 #Same as before but with a column to show the iterations 
-Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0, iteration=0:B)
+Xtibble<- tibble( spaceX=0 ,
+                  spaceY=0 ,
+                  spaceZ=0 ,
+                  iteration = 0:B )
 
 tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
+
 tresholds2<-0.99*tresholds
 
 ft<-function(u, a){
@@ -213,6 +226,10 @@ for(i in 1:B+1){
   Xtibble[i,j]=Xtibble[i-1,j]+ft(Ut[i-1],tresholds2)[j]}
 }
 
+
+```
+
+```{r}
 print(Xtibble[Xtibble$iteration==B, ])
 
 ##Showing departure and arrival, 3D 
@@ -225,129 +242,78 @@ pmat<-scatter3D(Xtibble$spaceX, Xtibble$spaceY, Xtibble$spaceZ,phi = 0, bty = "g
 points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
                c(Xtibble$spaceY[1],Xtibble$spaceY[B+1]),
                c(Xtibble$spaceZ[1],Xtibble$spaceZ[B+1]),
-               pmat =pmat ),  col = c("green","red"), pch = 16)
+               pmat =pmat ),  col = c("red","blue"), pch = 16)
 
-##part B , works but so slooooow 
-B <- 10^5
-set.seed(2000)
+```
 
-Ut <- runif(B)
+## Bonus:
 
-#Same as before but with a column to show the iterations 
-Xtibble<- tibble( spaceX=0, spaceY=0, spaceZ=0, iteration=0:B)
-
-tresholds<-c(1/6,2/6,3/6,4/6,5/6,6/6)
-tresholds2<-0.99*tresholds
-
-ft<-function(u, a){
-  { if(u<=a[1]){
-    direction<- c(1,0,0)}else if(u>a[1]&& u<=a[2]) {
-      direction<-c(-1,0,0)}else if (u>a[2]&& u<=a[3] ){
-        direction<- c(0,1,0)}else if (u>a[3]&& u<=a[4] ){
-          direction<- c(0,-1,0)}else if (u>a[4]&& u<=a[5] ){
-            direction<- c(0,0,1)}else{
-              direction<-c(0,0,-1)} }
-  
-  return(direction)
-}
-
-#Try to see if quicker... not quicker... 
-#ft2<-function(u, a){
-#switch (u,
- #       "u<=a[1]" = direction<-c(1,0,0),
- #       "(u>a[1]&& u<=a[2])"=direction<-c(-1,0,0),
- #       "(u>a[2]&& u<=a[3])"=direction<-c(0,1,0),
- #       "(u>a[3]&& u<=a[4])"=direction<-c(0,-1,0),
- #       "(u>a[4]&& u<=a[5])"=direction<-c(0,0,1),
- #       "(u>a[5])"=direction<-c(-1,0,0)
-#)
-  
- # return(direction)
-#}
-
-
-for(i in 1:B+1){ 
-  for(j in 1:3){
-    Xtibble[i,j]=Xtibble[i-1,j]+ft(Ut[i-1],tresholds2)[j]}
-}
-
-print(Xtibble[Xtibble$iteration==B, ])
-
-##Showing departure and arrival, 3D 
-#Still needs title and beautifying :) 
-pmat<-scatter3D(Xtibble$spaceX, Xtibble$spaceY, Xtibble$spaceZ,phi = 0, bty = "g", type = "b",
-                ticktype = "detailed", pch = 10, 
-                cex = c(0.1, 0.1, 0.1), col="black"
-)
-
-points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
-               c(Xtibble$spaceY[1],Xtibble$spaceY[B+1]),
-               c(Xtibble$spaceZ[1],Xtibble$spaceZ[B+1]),
-               pmat =pmat ),  col = c("green","red"), pch = 16)
-
-
+```{r, warning = FALSE, message = FALSE, echo=FALSE}
 ## Animation bonus:
-brownian.motion(n = 20, xlim = c(-20, 20), ylim = c(-20, 20))
-
+opts_knit$set(animation.fun = hook_scianimator)
+ani.options(nmax = 50)  # create 50 image frames
+set.seed(20121106)
+brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
+    10), ylim = c(-15, 15))
 ```
 
 
-## Problem 4: Portfolio construction
+ #Problem 4: Portfolio construction
+ 
 ```{r, cache=TRUE}
-library(quantmod)
-library(rvest)
-sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
-
-#Extract ticker
-
-sp500 %>% 
-  html_nodes(".text") %>% 
-  html_text() -> ticker_sp500
-
-SP500_symbol <- ticker_sp500[ticker_sp500!= "reports"]
-SP500_symbol <- SP500_symbol[1:504]
-
-# Replace "." by "-"
-SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
-
-# Specify timing
-tot_length <- 3 * 365
-today <- Sys.Date()
-seq_three_years <- seq(today,by=-1,length.out=tot_length)
-three_year_ago <- seq_three_years[tot_length]
-
-# Retrieve data for all stocks
-
-return.stock<- NULL
-
-for (i in 1:length(SP500_symbol)){
-stock_price<-NULL
-getSymbols(SP500_symbol[i],from=three_year_ago,to=today)
-stock_price <- ClCl(get(SP500_symbol[i]))
-stock_price <- stock_price[-1]
-colnames(stock_price)<-SP500_symbol[i]
-return.stock <- cbind(return.stock, stock_price)
-remove(list= SP500_symbol[i])
-}
-
-#remove columns that contains NA
-return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
-
+# library(quantmod)
+# library(rvest)
+# sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+# 
+# #Extract ticker
+# 
+# sp500 %>% 
+#   html_nodes(".text") %>% 
+#   html_text() -> ticker_sp500
+# 
+# SP500_symbol <- ticker_sp500[ticker_sp500!= "reports"]
+# SP500_symbol <- SP500_symbol[1:504]
+# 
+# # Replace "." by "-"
+# SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
+# 
+# # Specify timing
+# tot_length <- 3 * 365
+# today <- Sys.Date()
+# seq_three_years <- seq(today,by=-1,length.out=tot_length)
+# three_year_ago <- seq_three_years[tot_length]
+# 
+# # Retrieve data for all stocks
+# 
+# return.stock<- NULL
+# 
+# for (i in 1:length(SP500_symbol)){
+# stock_price<-NULL
+# getSymbols(SP500_symbol[i],from=three_year_ago,to=today)
+# stock_price <- ClCl(get(SP500_symbol[i]))
+# stock_price <- stock_price[-1]
+# colnames(stock_price)<-SP500_symbol[i]
+# return.stock <- cbind(return.stock, stock_price)
+# remove(list= SP500_symbol[i])
+# }
+# 
+# #remove columns that contains NA
+# return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
+# 
 ```
 
-
 ```{r, cache=TRUE}
-
-return.stock <- data.frame(return.stock)
-
-
-mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
-do.call(cbind.data.frame,Map(expand.grid,teacher=teachers,students=students))
-
-
-sd.return <- apply(return.stock,2,function(x) sd(x))
-
-
-cov(return.stock)
+# 
+# return.stock <- data.frame(return.stock)
+# 
+# 
+# mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
+# do.call(cbind.data.frame,Map(expand.grid,teacher=teachers,students=students))
+# 
+# 
+# sd.return <- apply(return.stock,2,function(x) sd(x))
+# 
+# 
+# cov(return.stock)
 
 ```
