@@ -64,17 +64,20 @@ switzerland <- world_map@polygons[[40]]@Polygons[[1]]@coords %>% as_tibble()
 
 
 ggplot() +
-geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
-geom_point( data= cities, aes(x=longitude, y=latitude, size=volume, color=language))+
-scale_size_continuous(range=c(1,12)) +
-coord_map()+
-theme(panel.background = element_rect(fill= NA, colour="darkgrey",         linetype="solid"))+
-xlab("longitude")+
-ylab("latitude")+
-labs(title = "Volume of real estate market in Switzerland",
-    subtitle = "Updated on the")
-
-
+  geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
+  geom_point( data= cities, aes(x=longitude, y=latitude, size=volume, color=language))+
+  scale_size_continuous(range=c(1,12)) +
+  coord_map()+
+  theme(panel.background = element_rect(fill= NA, colour="darkgrey",         linetype="solid"))+
+  xlab("longitude")+
+  ylab("latitude")+
+  labs(title = "Volume of real estate market in Switzerland",
+    subtitle = c("update", Sys.Date()))+
+  guides(size= guide_legend(order = 1),
+        color = guide_legend(order = 2))+
+  theme(legend.key  = element_rect(fill=NA,
+                                  size=0.5))
+  
 ```
 
 
