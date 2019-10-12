@@ -98,11 +98,14 @@ ggplot() +
   xlab("longitude")+
   ylab("latitude")+
   labs(title = "Volume of real estate market in Switzerland",
-    subtitle = c("update", Sys.Date()))+
+    subtitle = paste("Updated on", as.character(Sys.Date())))+
   guides(size= guide_legend(order = 1),
         color = guide_legend(order = 2))+
   theme(legend.key  = element_rect(fill=NA,
                                   size=0.5))
+
+
+  
   
 ```
 
