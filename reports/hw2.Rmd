@@ -95,8 +95,10 @@ ggplot() +
   scale_size_continuous(range=c(1,12)) +
   coord_map()+
   theme(panel.background = element_rect(fill= NA, colour="darkgrey",         linetype="solid"))+
-  xlab("longitude")+
-  ylab("latitude")+
+  xlab("Longitude")+
+  ylab("Latitude")+
+  scale_size_continuous(name = "Volume")+
+  scale_color_discrete(name = "Language")+
   labs(title = "Volume of real estate market in Switzerland",
     subtitle = paste("Updated on", as.character(Sys.Date())))+
   guides(size= guide_legend(order = 1),
