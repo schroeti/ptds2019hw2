@@ -265,60 +265,273 @@ brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10,
 
  #Problem 4: Portfolio construction
  
+## Problem 4: Portfolio construction
+
+To construct the portfolio we need first to extract the stock data from internet. 
+
+We first exctract the SP500 index tickers from wikipedia. 
 ```{r, cache=TRUE}
-# library(quantmod)
-# library(rvest)
-# sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
-# 
-# #Extract ticker
-# 
-# sp500 %>% 
-#   html_nodes(".text") %>% 
-#   html_text() -> ticker_sp500
-# 
-# SP500_symbol <- ticker_sp500[ticker_sp500!= "reports"]
-# SP500_symbol <- SP500_symbol[1:504]
-# 
-# # Replace "." by "-"
-# SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
-# 
-# # Specify timing
-# tot_length <- 3 * 365
-# today <- Sys.Date()
-# seq_three_years <- seq(today,by=-1,length.out=tot_length)
-# three_year_ago <- seq_three_years[tot_length]
-# 
-# # Retrieve data for all stocks
-# 
-# return.stock<- NULL
-# 
-# for (i in 1:length(SP500_symbol)){
-# stock_price<-NULL
-# getSymbols(SP500_symbol[i],from=three_year_ago,to=today)
-# stock_price <- ClCl(get(SP500_symbol[i]))
-# stock_price <- stock_price[-1]
-# colnames(stock_price)<-SP500_symbol[i]
-# return.stock <- cbind(return.stock, stock_price)
-# remove(list= SP500_symbol[i])
-# }
-# 
-# #remove columns that contains NA
-# return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
-# 
+library(quantmod)
+library(rvest)
+library(dplyr)
+library(tidyr)
+sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+
+#Extract ticker
+
+sp500 %>% 
+  html_nodes(".text") %>% 
+  html_text() -> ticker_sp500
+
+SP500_symbol <- ticker_sp500[ticker_sp500!= "reports"]
+SP500_symbol <- SP500_symbol[1:504]
+
+# Replace "." by "-"
+SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
+
+as_tibble(head(SP500_symbol))
+```
+Here are the 6 first extracted tickers. We can notice that there is `r length(SP500_symbol)` and not 500. This is becuase there is more thtan 500 companies listed on the sp500. 
+
+
+
+
+
+We then use those tickers to extract stocks price data from Yahoo. For our model only the daily change in percentage is relevant. So we will exctract only those. 
+```{r, cache=TRUE}
+
+# Specify timing
+tot_length <- 3 * 365
+today <- Sys.Date()
+seq_three_years <- seq(today,by=-1,length.out=tot_length)
+three_year_ago <- seq_three_years[tot_length]
+
+# Retrieve data for all stocks
+
+return.stock<- NULL
+
+for (i in 1:length(SP500_symbol)){
+stock_price<-NULL
+getSymbols(SP500_symbol[i],from=three_year_ago,to=today)
+stock_price <- ClCl(get(SP500_symbol[i]))
+stock_price <- stock_price[-1]
+colnames(stock_price)<-SP500_symbol[i]
+return.stock <- cbind(return.stock, stock_price)
+remove(list= SP500_symbol[i])
+}
+
+#remove columns that contains NA
+return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
+
+as_tibble(head(return.stock[,1:6]))
+
+```
+Here are the few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
+
+
+
+```{r, cache=TRUE}
+
+return.stock <- data.frame(return.stock)
+
+#Create the variables thatt are needed for the calculation. 
+
+mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
+mean.return<-cbind("Company"= rownames(mean.return),mean.return)
+mean.return<- do.call(cbind.data.frame,Map(expand.grid,company.1=mean.return, company.2=mean.return))
+mean.return<-mean.return %>% rename(
+    Company.1 = Company.company.1,
+    Company.2 = Company.company.2
+    )
+
+
+sd.return <- data.frame("sd.return" = apply(return.stock,2,function(x) sd(x)))
+sd.return<-cbind("Company"= rownames(sd.return),sd.return)
+sd.return<- do.call(cbind.data.frame,Map(expand.grid,company.1=sd.return, company.2=sd.return))
+sd.return<- sd.return %>% rename(
+    Company.1 = Company.company.1,
+    Company.2 = Company.company.2
+    )
+
+cov.return <- data.frame(cov(return.stock))
+cov.return<-cbind("Company.1"=rep(colnames(return.stock), 499) ,gather(cov.return,"Company.2", "Cov", na.rm = FALSE, convert = FALSE))
+
+
+#We merge all clean database 
+return.clean <- left_join(mean.return,sd.return) %>% left_join(cov.return) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
+
+as_tibble(head(return.clean[,]))
+
+
+```
+The datas after preparation have 7 columns: a pair of tickers, their daily return, their standard deviation and the covariance. The data frame have `r nrow(return.clean)` which is the expected number if we combine all the possible pairs of tickers following this equation : $$ \frac{n(n-1)}{2}$$
+
+
+
+Now to find the expected return and covariance we will use two functions : 
+
+$$Portfolio\; expected \;return: \;\;\;\;\;\;  \mathbb{E}(R_p)= w\mathbb{E}(R_{i}) + (1-w)\mathbb{E}(R_{j}) $$
+$$Portfolio \;return \; variance: \;\;\;\;\;\;  \sigma^2_p = w^2\sigma^2_i + (1-w)^2\sigma^2_j + 2w(1-w)\sigma_i\sigma_j\rho_{ij}  $$
+
+To facilitate calculations the weight will not be continuous but distrtibuted bettween 0 and 1 in sequence of 0.1. 
+
+```{r}
+
+
+return.clean.matrix <- data.matrix(return.clean[3:7], rownames.force = NA) #transform in a matrix to ease computation. 
+
+
+sigma<- seq(0,1,0.1)
+
+
+esp_return <- function(i,x){return.clean.matrix[i,1]*x+return.clean.matrix[i,2]*(1-x)}
+risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,4]^2*(1-x)^2+
+                             2*x*(1-x)*return.clean.matrix[i,5])}
+
+
+#daily_return <- cbind(return.clean[,1:2],setNames(data.frame(matrix(ncol = 11, nrow = 124,251)), as.character(sigma)))
+
+
+nrow(return.clean.matrix)
+
+```
+
+For the heavy calculation of running the function 11 times over all the rows the package future was used to distribute the calculation amongst different cores. 
+
+```{r, cache=TRUE}
+#install.packages("future")
+library(future)
+
+
+plan(multiprocess)
+
+
+a %<-% {
+  ret1<-NULL
+  for (i in 1:50000){
+  ret.a<-NULL
+  ret.a<-esp_return(i, sigma)
+  ret1<- rbind(ret1,ret.a)
+  } 
+  return(ret1)
+}
+
+b %<-% { 
+  ret2<-NULL
+  for (i in 50001:100000){
+  ret.b<-NULL
+  ret.b<-esp_return(i, sigma)
+  ret2<- rbind(ret2,ret.b)
+  }
+return(ret2)
+}
+
+c %<-% {
+  ret3<-NULL
+  for (i in 100001:nrow(return.clean.matrix)
+){
+  ret.c<-NULL
+  ret.c<-esp_return(i, sigma)
+  ret3<- rbind(ret3,ret.c)
+  } 
+  return(ret3)
+}
+
+
+final.return <- rbind(a,b,c)
+
+
+
 ```
 
 ```{r, cache=TRUE}
-# 
-# return.stock <- data.frame(return.stock)
-# 
-# 
-# mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
-# do.call(cbind.data.frame,Map(expand.grid,teacher=teachers,students=students))
-# 
-# 
-# sd.return <- apply(return.stock,2,function(x) sd(x))
-# 
-# 
-# cov(return.stock)
+
+
+a %<-% {
+  ret1<-NULL
+  for (i in 1:50000){
+  ret.a<-NULL
+  ret.a<-risk(i, sigma)
+  ret1<- rbind(ret1,ret.a)
+  } 
+  return(ret1)
+}
+
+b %<-% { 
+  ret2<-NULL
+  for (i in 50001:100000){
+  ret.b<-NULL
+  ret.b<-risk(i, sigma)
+  ret2<- rbind(ret2,ret.b)
+  }
+return(ret2)
+}
+
+c %<-% {
+  ret3<-NULL
+  for (i in 100001:nrow(return.clean.matrix)){
+  ret.c<-NULL
+  ret.c<-risk(i, sigma)
+  ret3<- rbind(ret3,ret.c)
+  } 
+  return(ret3)
+}
+
+
+
+final.sd <- rbind(a,b,c)
+
+
+```
+
+
+```{r, cache=TRUE}
+
+
+All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Sd" = final.sd, "Return" = final.return)
+head(All.portfolio)
+
+min(All.portfolio[,3:13])
+
+```
+
+```{r, cache=TRUE}
+
+library(ggplot2)
+install.packages("ggrepel")
+library(ggrepel)
+
+theme_set(theme_bw())
+
+
+
+
+df<- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Variance" = final.sd[,6], "ret" = final.return[,6])
+
+df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifelse(Min == TRUE, as.character(paste(company.1,company.2,sep = "-")), NA)) -> df
+
+
+
+
+ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
+  scale_color_discrete(name = NULL, labels = c("Autre Portfolio", "Min variance Portfolio")) +
+  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+
+  geom_label(label = df$Portfolio, 
+    nudge_x = 0.00 , nudge_y = 0.0002, 
+    check_overlap = F, size = 2,
+    color = "#00AFBB",fontface = "bold")+
+    geom_point()
+
+ 
+
+```
+
+
+
+
+
+
+
+
 
 ```
