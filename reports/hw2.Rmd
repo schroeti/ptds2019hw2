@@ -326,7 +326,7 @@ return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))]
 as_tibble(head(return.stock[,1:6]))
 
 ```
-Here are the few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
+Here are few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
 
 
 
@@ -334,7 +334,7 @@ Here are the few columns of the extracted datas. We can notice that each column 
 
 return.stock <- data.frame(return.stock)
 
-#Create the variables thatt are needed for the calculation. 
+#Create the variables that are needed for the calculation. 
 
 mean.return <- data.frame("mean.return" = apply(return.stock,2,function(x) mean(x)))
 mean.return<-cbind("Company"= rownames(mean.return),mean.return)
@@ -373,7 +373,7 @@ Now to find the expected return and covariance we will use two functions :
 $$Portfolio\; expected \;return: \;\;\;\;\;\;  \mathbb{E}(R_p)= w\mathbb{E}(R_{i}) + (1-w)\mathbb{E}(R_{j}) $$
 $$Portfolio \;return \; variance: \;\;\;\;\;\;  \sigma^2_p = w^2\sigma^2_i + (1-w)^2\sigma^2_j + 2w(1-w)\sigma_i\sigma_j\rho_{ij}  $$
 
-To facilitate calculations the weight will not be continuous but distrtibuted bettween 0 and 1 in sequence of 0.1. 
+To facilitate calculations the weight will not be continuous but distrtibuted between 0 and 1 in sequence of 0.1. 
 
 ```{r}
 
@@ -381,10 +381,11 @@ To facilitate calculations the weight will not be continuous but distrtibuted be
 return.clean.matrix <- data.matrix(return.clean[3:7], rownames.force = NA) #transform in a matrix to ease computation. 
 
 
-sigma<- seq(0,1,0.1)
+sigma<- seq(0,1,0.1) #the weight distribution vector 
 
 
 esp_return <- function(i,x){return.clean.matrix[i,1]*x+return.clean.matrix[i,2]*(1-x)}
+
 risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,4]^2*(1-x)^2+
                              2*x*(1-x)*return.clean.matrix[i,5])}
 
@@ -392,11 +393,9 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 #daily_return <- cbind(return.clean[,1:2],setNames(data.frame(matrix(ncol = 11, nrow = 124,251)), as.character(sigma)))
 
 
-nrow(return.clean.matrix)
-
 ```
 
-For the heavy calculation of running the function 11 times over all the rows the package future was used to distribute the calculation amongst different cores. 
+For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)`rows the package future was used to distribute the calculation amongst different cores. 
 
 ```{r, cache=TRUE}
 #install.packages("future")
@@ -498,7 +497,7 @@ min(All.portfolio[,3:13])
 ```{r, cache=TRUE}
 
 library(ggplot2)
-install.packages("ggrepel")
+#install.packages("ggrepel")
 library(ggrepel)
 
 theme_set(theme_bw())
