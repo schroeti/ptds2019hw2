@@ -390,7 +390,7 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
                              2*x*(1-x)*return.clean.matrix[i,5])}
 
 
-#daily_return <- cbind(return.clean[,1:2],setNames(data.frame(matrix(ncol = 11, nrow = 124,251)), as.character(sigma)))
+#daily_return <- cbind(return.clean[,1:2],setNames(data.frame(matrix(ncol = 11, nrow = nrow(return.clean))), as.character(sigma)))
 
 
 ```
@@ -487,12 +487,31 @@ final.sd <- rbind(a,b,c)
 ```{r, cache=TRUE}
 
 
-All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Sd" = final.sd, "Return" = final.return)
-head(All.portfolio)
+All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Return" = final.return, "Sd" = final.sd)
 
-min(All.portfolio[,3:13])
+names(All.portfolio) <- c("company.1", "company.2", paste0("R",".",sigma),paste0("SD",".",sigma))
+
+
+All.portfolio.long <- cbind(gather(All.portfolio[,1:13],Weight.Company.1 , Return , R.0:R.1, factor_key=TRUE),  "SD" =gather(All.portfolio[,c(1:2,14:24)],Portfolio, SD , SD.0:SD.1, factor_key=TRUE)[,4])  #put in long format to find min. 
+
+
+lowerSD.portfolio <- All.portfolio.long[All.portfolio.long[,5] == min(All.portfolio.long[,5]),]
+
+lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Company.1)
+
+
+
+round(lowerSD.portfolio$SD, digits = 4)*1000000
 
 ```
+After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviaiton of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)*1000000`%. 
+
+With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
+
+
+
+
+
 
 ```{r, cache=TRUE}
 
@@ -505,7 +524,7 @@ theme_set(theme_bw())
 
 
 
-df<- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Variance" = final.sd[,6], "ret" = final.return[,6])
+df<- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Variance" = final.sd[,5], "ret" = final.return[,5])
 
 df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifelse(Min == TRUE, as.character(paste(company.1,company.2,sep = "-")), NA)) -> df
 
