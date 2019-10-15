@@ -165,7 +165,11 @@ for( i in 1:B+1 ) {
 ```
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
-print( Xtibble[ Xtibble$iteration == B , ])
+
+Xtibble[ Xtibble$iteration == B , ]%>%
+  kable(col.names=c("x","y","z","iteration"),
+        caption="Last coordinates after random walk of 10 000 iterations") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size = 7), full_width=FALSE)
 
 ##Showing departure and arrival, 3D 
 #Still needs title and beautifying :) 
@@ -240,7 +244,11 @@ for(i in 1:B+1){
 ```
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
-print(Xtibble[Xtibble$iteration==B, ])
+Xtibble[Xtibble$iteration==B, ]%>%
+  kable(col.names=c("x","y","z","iteration"),
+        caption="Last coordinates after random walk of 100 000 iterations") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size = 7), full_width=FALSE)
+
 
 ##Showing departure and arrival, 3D 
 #Still needs title and beautifying :) 
@@ -258,38 +266,37 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 
 ## Bonus:
 
-```{r, warning = FALSE, message = FALSE, echo=FALSE}
+```{r chunk-label, fig.show='animate', ffmpeg.format='gif', dev='jpeg'}
 ## Animation bonus:
-#opts_knit$set(animation.fun = hook_scianimator)
-#ani.options(nmax = 50)  # create 50 image frames
-#set.seed(20121106)
-#brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
- #   10), ylim = c(-15, 15))
+opts_knit$set(animation.fun = hook_scianimator)
+ani.options(nmax = 50)  # create 50 image frames
+set.seed(20121106)
+brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
+    10), ylim = c(-15, 15))
 
-a = saveGIF({
-  par(mar = rep(3, 4))
-  n = 10
-  tmax = 30
-  set.seed(20161013)
-  x = rnorm(n)
-  y = rnorm(n)
-  ani.options(interval = 0.5, nmax = tmax)  
-  for (i in 1:tmax) {
-    plot(x, y, pch = 21, cex = 4, 
-         col = "red", bg = "yellow",
-         xlim = c(-10, 10), ylim =  c(-10, 10),
-         main = "Simulation of 2D Brownian Motion")
-    text(x, y)
-    x = x + rnorm(n)
-    y = y + rnorm(n)
-    }
-  }, movie.name = "Brownian2.gif")
+#a = saveGIF({
+#  par(mar = rep(3, 4))
+#  n = 10
+#  tmax = 30
+#  set.seed(20161013)
+#  x = rnorm(n)
+#  y = rnorm(n)
+#  ani.options(interval = 0.5, nmax = tmax)  
+#  for (i in 1:tmax) {
+#    plot(x, y, pch = 21, cex = 4, 
+ #        col = "red", bg = "yellow",
+  #       xlim = c(-10, 10), ylim =  c(-10, 10),
+   #      main = "Simulation of 2D Brownian Motion")
+ #   text(x, y)
+ #   x = x + rnorm(n)
+ #   y = y + rnorm(n)
+  #  }
+ # }, movie.name = "Brownian2.gif")
 ```
 
 
- #Problem 4: Portfolio construction
- 
-## Problem 4: Portfolio construction
+
+# Problem 4: Portfolio construction
 
 To construct the portfolio we need first to extract the stock data from internet. 
 
