@@ -20,8 +20,7 @@ ggmap, rworldmap, rworldxtra, magriits, ptsdpkg, mapproj, plotly, tidytext, read
 
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
-
-library("rmdformats")
+library(rmdformats)
 library(rworldmap)
 library(rworldxtra)
 library(ggmap)
@@ -39,6 +38,8 @@ library(plot3D)
 library(animation)
 library(knitr)
 library(kableExtra)
+library(ggrepel)
+
 
 ```
 # Problem 1: Fuzz Bizz
@@ -297,7 +298,7 @@ a = saveGIF({
 To construct the portfolio we need first to extract the stock data from internet. 
 
 We first exctract the SP500 index tickers from wikipedia. 
-```{r, cache=TRUE}
+```{r, warning=FALSE, message = FALSE, echo=FALSE }
 library(quantmod)
 library(rvest)
 library(dplyr)
@@ -323,7 +324,7 @@ Here are the 6 first extracted tickers. We can notice that there is `r length(SP
 
 
 We then use those tickers to extract stocks price data from Yahoo. For our model only the daily change in percentage is relevant. So we will exctract only those. 
-```{r, cache=TRUE}
+```{r, warning=FALSE, message = FALSE, echo=FALSE, cache = TRUE, dependson=SP500_symbol }
 
 # Specify timing
 tot_length <- 3 * 365
@@ -529,20 +530,12 @@ lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Com
 round(lowerSD.portfolio$SD, digits = 4)*1000000
 
 ```
-After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviaiton of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)*1000000`%. 
-
-With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
-
-
-
 
 
 
 ```{r, cache=TRUE}
 
-library(ggplot2)
 #install.packages("ggrepel")
-library(ggrepel)
 
 theme_set(theme_bw())
 
@@ -558,19 +551,19 @@ df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifel
 
 ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
   scale_color_discrete(name = NULL, labels = c("Autre Portfolio", "Min variance Portfolio")) +
-  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+
+  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+ ylab("Return")+xlab("Standard-deviation")+title("Return and SD of all portfolios with a weight distribution of 0.4 and 0.6 for each stock respectively")+
   geom_label(label = df$Portfolio, 
     nudge_x = 0.00 , nudge_y = 0.0002, 
     check_overlap = F, size = 2,
     color = "#00AFBB",fontface = "bold")+
     geom_point()
 
- 
-
 ```
 
 
+After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviaiton of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)*1000000`%. 
 
+With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
 
 
 
