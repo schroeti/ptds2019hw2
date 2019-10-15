@@ -266,34 +266,34 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 
 ## Bonus:
 
-```{r chunk-label, fig.show='animate', ffmpeg.format='gif', dev='jpeg'}
-## Animation bonus:
-opts_knit$set(animation.fun = hook_scianimator)
-ani.options(nmax = 50)  # create 50 image frames
-set.seed(20121106)
-brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
-    10), ylim = c(-15, 15))
+```{r , fig.show='animate', interval=.1}
 
-#a = saveGIF({
-#  par(mar = rep(3, 4))
-#  n = 10
-#  tmax = 30
-#  set.seed(20161013)
-#  x = rnorm(n)
-#  y = rnorm(n)
-#  ani.options(interval = 0.5, nmax = tmax)  
-#  for (i in 1:tmax) {
-#    plot(x, y, pch = 21, cex = 4, 
- #        col = "red", bg = "yellow",
-  #       xlim = c(-10, 10), ylim =  c(-10, 10),
-   #      main = "Simulation of 2D Brownian Motion")
- #   text(x, y)
- #   x = x + rnorm(n)
- #   y = y + rnorm(n)
-  #  }
- # }, movie.name = "Brownian2.gif")
+a = saveGIF({
+  par(mar = rep(3, 4))
+  n = 10
+  tmax = 30
+  set.seed(20161013)
+  x = rnorm(n)
+  y = rnorm(n)
+  ani.options(interval = 0.5, nmax = tmax)  
+  for (i in 1:tmax) {
+    plot(x, y, pch = 21, cex = 4, 
+         col = "red", bg = "yellow",
+         xlim = c(-10, 10), ylim =  c(-10, 10),
+         main = "Simulation of 2D Brownian Motion")
+    text(x, y)
+    x = x + rnorm(n)
+    y = y + rnorm(n)
+    }
+  }, movie.name = "Brownian2.gif")
 ```
 
+<div style="text-align:center;">
+<video width="640" height="480" controls>
+  <source src="Brownian2.gif" type="video/mp4">
+</video>
+</div>
+ 
 
 
 # Problem 4: Portfolio construction
