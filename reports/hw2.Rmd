@@ -38,11 +38,13 @@ library(dplyr)
 library(plot3D)
 library(animation)
 library(knitr)
+library(kableExtra)
 
 ```
 # Problem 1: Fuzz Bizz
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
+
 
 i <- 1
 df <- data.frame()
@@ -58,7 +60,10 @@ while (i<=1000)  {
   }
   i <- i+1
 }
-print(df)
+
+df %>%
+  kable(col.names="Number") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size = 7), full_width=FALSE)
 
 ```
 
@@ -159,7 +164,7 @@ for( i in 1:B+1 ) {
 }
 ```
 
-```{r}
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
 print( Xtibble[ Xtibble$iteration == B , ])
 
 ##Showing departure and arrival, 3D 
@@ -234,7 +239,7 @@ for(i in 1:B+1){
 
 ```
 
-```{r}
+```{r,warning = FALSE, message = FALSE, echo=FALSE}
 print(Xtibble[Xtibble$iteration==B, ])
 
 ##Showing departure and arrival, 3D 
@@ -255,11 +260,30 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 
 ```{r, warning = FALSE, message = FALSE, echo=FALSE}
 ## Animation bonus:
-opts_knit$set(animation.fun = hook_scianimator)
-ani.options(nmax = 50)  # create 50 image frames
-set.seed(20121106)
-brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
-    10), ylim = c(-15, 15))
+#opts_knit$set(animation.fun = hook_scianimator)
+#ani.options(nmax = 50)  # create 50 image frames
+#set.seed(20121106)
+#brownian.motion(n = 20, pch = 21, cex = 4, col = "red", xlim = c(-10, 
+ #   10), ylim = c(-15, 15))
+
+a = saveGIF({
+  par(mar = rep(3, 4))
+  n = 10
+  tmax = 30
+  set.seed(20161013)
+  x = rnorm(n)
+  y = rnorm(n)
+  ani.options(interval = 0.5, nmax = tmax)  
+  for (i in 1:tmax) {
+    plot(x, y, pch = 21, cex = 4, 
+         col = "red", bg = "yellow",
+         xlim = c(-10, 10), ylim =  c(-10, 10),
+         main = "Simulation of 2D Brownian Motion")
+    text(x, y)
+    x = x + rnorm(n)
+    y = y + rnorm(n)
+    }
+  }, movie.name = "Brownian2.gif")
 ```
 
 
@@ -292,8 +316,6 @@ SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
 as_tibble(head(SP500_symbol))
 ```
 Here are the 6 first extracted tickers. We can notice that there is `r length(SP500_symbol)` and not 500. This is becuase there is more thtan 500 companies listed on the sp500. 
-
-
 
 
 
@@ -533,4 +555,4 @@ ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
 
 
 
-```
+
