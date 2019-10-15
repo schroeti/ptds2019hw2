@@ -79,11 +79,6 @@ cities <- tibble(
   longitude = c(8.538030, 7.448130, 6.632130, 6.143158, 7.580610)
 )
 
-get_volume("zurich", delay = 1)
-get_volume("bern", delay = 1)
-get_volume("lausanne", delay = 1)
-get_volume("geneva", delay = 1)
-get_volume("basel", delay = 1)
 cities <- cities %>%
   mutate(volume = sapply(name, get_volume))
 
@@ -286,6 +281,7 @@ a = saveGIF({
     y = y + rnorm(n)
     }
   }, movie.name = "Brownian2.gif")
+
 ```
 
 <div style="text-align:center;">
