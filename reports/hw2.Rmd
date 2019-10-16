@@ -39,6 +39,7 @@ library(animation)
 library(knitr)
 library(kableExtra)
 library(ggrepel)
+library(future)
 
 
 ```
@@ -424,7 +425,7 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)`rows the package future was used to distribute the calculation amongst different cores. 
 
 ```{r, cache=TRUE}
-#install.packages("future")
+
 library(future)
 
 
@@ -535,7 +536,7 @@ round(lowerSD.portfolio$SD, digits = 4)*1000000
 
 ```{r, cache=TRUE}
 
-#install.packages("ggrepel")
+
 
 theme_set(theme_bw())
 
