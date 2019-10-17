@@ -322,7 +322,9 @@ SP500_symbol <- SP500_symbol[1:504]
 # Replace "." by "-"
 SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
 
-as_tibble(head(SP500_symbol))
+kable(as_tibble(head(SP500_symbol)))
+
+
 ```
 Here are the 6 first extracted tickers. We can notice that there is `r length(SP500_symbol)` and not 500. This is becuase there is more thtan 500 companies listed on the sp500. 
 
@@ -354,14 +356,14 @@ remove(list= SP500_symbol[i])
 #remove columns that contains NA
 return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
 
-as_tibble(head(return.stock[,1:6]))
+kable(as_tibble(head(return.stock[,1:6])))
 
 ```
 Here are few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
 
 
 
-```{r, cache=TRUE,echo= FALSE}
+```{r, cache=TRUE,echo= FALSE, warning=FALSE}
 
 return.stock <- data.frame(return.stock)
 
@@ -391,7 +393,7 @@ cov.return<-cbind("Company.1"=rep(colnames(return.stock), 499) ,gather(cov.retur
 #We merge all clean database 
 return.clean <- left_join(mean.return,sd.return) %>% left_join(cov.return) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
 
-as_tibble(head(return.clean[,]))
+kable(as_tibble(head(return.clean[,])))
 
 
 ```
@@ -532,7 +534,7 @@ lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Com
 
 
 
-round(lowerSD.portfolio$SD, digits = 4)*1000000
+kable(round(lowerSD.portfolio$SD, digits = 4)*1000000)
 
 ```
 
@@ -557,7 +559,8 @@ df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifel
 ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
   scale_color_discrete(name = NULL, labels = c("Autre Portfolio", "Min variance Portfolio")) +
   scale_alpha_manual(values = c(0.01,1), guide=FALSE)+ ylab("Return")+xlab("Standard-deviation")+
-  ggtitle("Return and SD of all portfolios with a weight distribution of 0.4 and 0.6 for each stock respectively")+
+  ggtitle("Return and SD of all portfolios with a weight distribution of \n  0.4 and 0.6 for each stock respectively")+
+  theme(plot.title = element_text(hjust = 0.5))+
   geom_label(label = df$Portfolio, 
     nudge_x = 0.00 , nudge_y = 0.0002, 
     check_overlap = F, size = 2,
