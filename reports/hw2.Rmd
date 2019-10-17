@@ -20,26 +20,26 @@ ggmap, rworldmap, rworldxtra, magriits, ptsdpkg, mapproj, plotly, tidytext, read
 
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
-library(rmdformats)
-library(rworldmap)
-library(rworldxtra)
-library(ggmap)
-library(tidyverse)
-library(magrittr)
-library(ptdspkg)
-library(mapproj)
-library(plotly)
-library(tidytext)
-library(readxl)
-library(tibble)
-library(ggplot2)
-library(dplyr)
-library(plot3D)
-library(animation)
-library(knitr)
-library(kableExtra)
-library(ggrepel)
-library(future)
+library("rmdformats")
+library("rworldmap")
+library("rworldxtra")
+library("ggmap")
+library("tidyverse")
+library("magrittr")
+library("ptdspkg")
+library("mapproj")
+library("plotly")
+library("tidytext")
+library("readxl")
+library("tibble")
+library("ggplot2")
+library("dplyr")
+library("plot3D")
+library("animation")
+library("knitr")
+library("kableExtra")
+library("ggrepel")
+library("future")
 
 
 ```
@@ -81,15 +81,22 @@ cities <- tibble(
   longitude = c(8.538030, 7.448130, 6.632130, 6.143158, 7.580610)
 )
 
+# Scrap prices from comparis.ch using ptdspkg::get_volume()
+#-------------------------------------------------------------------------------
+
 cities <- cities %>%
   mutate(volume = sapply(name, get_volume))
 
-typeof(cities$volume)
+# Draw the map
+#-------------------------------------------------------------------------------
+
 world_map <- getMap(resolution = "high")
 
 which(sapply(1:243, function(x) world_map@polygons[[x]]@ID) == "Switzerland")
 
 switzerland <- world_map@polygons[[40]]@Polygons[[1]]@coords %>% as_tibble()
+
+#creation of the plot
 
 ggplot() +
   geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
