@@ -40,6 +40,9 @@ library("knitr")
 library("kableExtra")
 library("ggrepel")
 library("future")
+library("quantmod")
+library("rvest")
+library("tidyr")
 
 
 ```
@@ -307,10 +310,7 @@ To construct the portfolio we need first to extract the stock data from internet
 
 We first exctract the SP500 index tickers from wikipedia. 
 ```{r, warning=FALSE, message = FALSE, echo=FALSE }
-library(quantmod)
-library(rvest)
-library(dplyr)
-library(tidyr)
+
 sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
 
 #Extract ticker
@@ -364,7 +364,7 @@ Here are few columns of the extracted datas. We can notice that each column is a
 
 
 
-```{r, cache=TRUE}
+```{r, cache=TRUE,echo= FALSE}
 
 return.stock <- data.frame(return.stock)
 
@@ -409,7 +409,7 @@ $$Portfolio \;return \; variance: \;\;\;\;\;\;  \sigma^2_p = w^2\sigma^2_i + (1-
 
 To facilitate calculations the weight will not be continuous but distrtibuted between 0 and 1 in sequence of 0.1. 
 
-```{r}
+```{r, cache=TRUE, echo= FALSE}
 
 
 return.clean.matrix <- data.matrix(return.clean[3:7], rownames.force = NA) #transform in a matrix to ease computation. 
@@ -431,9 +431,9 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 
 For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)`rows the package future was used to distribute the calculation amongst different cores. 
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, echo= FALSE}
 
-library(future)
+
 
 
 plan(multiprocess)
@@ -477,7 +477,7 @@ final.return <- rbind(a,b,c)
 
 ```
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, echo= FALSE}
 
 
 a %<-% {
@@ -518,7 +518,7 @@ final.sd <- rbind(a,b,c)
 ```
 
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, echo= FALSE}
 
 
 All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Return" = final.return, "Sd" = final.sd)
@@ -541,7 +541,7 @@ round(lowerSD.portfolio$SD, digits = 4)*1000000
 
 
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, warning=FALSE, echo=FALSE}
 
 
 
@@ -559,7 +559,8 @@ df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifel
 
 ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
   scale_color_discrete(name = NULL, labels = c("Autre Portfolio", "Min variance Portfolio")) +
-  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+ ylab("Return")+xlab("Standard-deviation")+title("Return and SD of all portfolios with a weight distribution of 0.4 and 0.6 for each stock respectively")+
+  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+ ylab("Return")+xlab("Standard-deviation")+
+  ggtitle("Return and SD of all portfolios with a weight distribution of 0.4 and 0.6 for each stock respectively")+
   geom_label(label = df$Portfolio, 
     nudge_x = 0.00 , nudge_y = 0.0002, 
     check_overlap = F, size = 2,
@@ -569,7 +570,7 @@ ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
 ```
 
 
-After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviaiton of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)*1000000`%. 
+After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviation of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)`%. 
 
 With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
 
