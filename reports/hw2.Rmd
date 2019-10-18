@@ -328,7 +328,8 @@ SP500_symbol <- SP500_symbol[1:504]
 # Replace "." by "-"
 SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
 
-kable(as_tibble(head(SP500_symbol)))
+kable(as_tibble(head(SP500_symbol)))%>%
+  kable_styling(position = "center")
 
 
 ```
@@ -362,7 +363,8 @@ remove(list= SP500_symbol[i])
 #remove columns that contains NA
 return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
 
-kable(as_tibble(head(return.stock[,1:6])))
+kable(as_tibble(head(return.stock[,1:6])))%>%
+  kable_styling(position = "center")
 
 ```
 Here are few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
@@ -399,7 +401,8 @@ cov.return<-cbind("Company.1"=rep(colnames(return.stock), 499) ,gather(cov.retur
 #We merge all clean database 
 return.clean <- left_join(mean.return,sd.return) %>% left_join(cov.return) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
 
-kable(as_tibble(head(return.clean[,])))
+kable(as_tibble(head(return.clean[,])))%>%
+  kable_styling(position = "center")
 
 
 ```
@@ -414,7 +417,7 @@ $$Portfolio \;return \; variance: \;\;\;\;\;\;  \sigma^2_p = w^2\sigma^2_i + (1-
 
 To facilitate calculations the weight will not be continuous but distrtibuted between 0 and 1 in sequence of 0.1. 
 
-```{r, cache=TRUE, echo= FALSE}
+```{r, cache=TRUE, echo= FALSE,warning=FALSE}
 
 
 return.clean.matrix <- data.matrix(return.clean[3:7], rownames.force = NA) #transform in a matrix to ease computation. 
@@ -436,7 +439,7 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 
 For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)`rows the package future was used to distribute the calculation amongst different cores. 
 
-```{r, cache=TRUE, echo= FALSE}
+```{r, cache=TRUE, echo= FALSE, warning=FALSE}
 
 
 
@@ -482,7 +485,7 @@ final.return <- rbind(a,b,c)
 
 ```
 
-```{r, cache=TRUE, echo= FALSE}
+```{r, cache=TRUE, echo= FALSE, warning=FALSE}
 
 
 a %<-% {
@@ -523,7 +526,7 @@ final.sd <- rbind(a,b,c)
 ```
 
 
-```{r, cache=TRUE, echo= FALSE}
+```{r, cache=TRUE, echo= FALSE, warning=FALSE}
 
 
 All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Return" = final.return, "Sd" = final.sd)
@@ -540,13 +543,14 @@ lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Com
 
 
 
-kable(round(lowerSD.portfolio$SD, digits = 4)*1000000)
+kable(round(lowerSD.portfolio$SD, digits = 4)*1000000)%>%
+  kable_styling(position = "center")
 
 ```
 
 
 
-```{r, cache=TRUE, warning=FALSE, echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.keep='all'}
 
 
 
