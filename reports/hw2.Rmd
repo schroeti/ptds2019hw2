@@ -278,32 +278,45 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 
 ```{r , fig.show='animate', interval=.1}
 
-a = saveGIF({
-  par(mar = rep(3, 4))
-  n = 10
-  tmax = 30
-  set.seed(20161013)
-  x = rnorm(n)
-  y = rnorm(n)
-  ani.options(interval = 0.5, nmax = tmax)  
-  for (i in 1:tmax) {
-    plot(x, y, pch = 21, cex = 4, 
-         col = "red", bg = "yellow",
-         xlim = c(-10, 10), ylim =  c(-10, 10),
-         main = "Simulation of 2D Brownian Motion")
-    text(x, y)
-    x = x + rnorm(n)
-    y = y + rnorm(n)
-    }
-  }, movie.name = "Brownian2.gif")
+a <- function(c) {pmat <- scatter3D ( Xtibble$spaceX[1:c] ,
+                                      Xtibble$spaceY[1:c] ,
+                                      Xtibble$spaceZ[1:c] ,
+                                      phi = 0 ,
+                                      bty = "g" ,
+                                      type = "b" ,
+                                      ticktype = "detailed" ,
+                                      pch = 10 , 
+                                      cex = c(0.1, 0.1, 0.1) , 
+                                      col="black" ,
+                                      xlab = "x" ,
+                                      ylab = "y" ,
+                                      zlab = "z" ,
+                                      zlim = c(-70,10),
+                                      xlim = c(-80,30),
+                                      ylim = c(-30,50),
+                                      main = "Random walk, 10 000 iterations " )
+
+points( trans3d( c( Xtibble$spaceX[ 1 ] ,
+                    Xtibble$spaceX[ B+1 ] ) , 
+                 c( Xtibble$spaceY[ 1 ] , 
+                    Xtibble$spaceY[ B+1 ] ) , 
+                 c( Xtibble$spaceZ[ 1 ] , 
+                    Xtibble$spaceZ[ B+1 ] ) ,
+                 pmat = pmat ) ,
+        col = c( "red" , "blue" ), 
+        pch = 16)}
+
+a(100)
+saveGIF(
+  for(i in 2:100){
+    a(i)
+  }, movie.name = "simulation.GIF"
+)
 
 ```
 
-<div style="text-align:center;">
-<video width="640" height="480" controls>
-  <source src="Brownian2.gif" type="video/mp4">
-</video>
-</div>
+![](simulation.GIF)
+
  
 
 
