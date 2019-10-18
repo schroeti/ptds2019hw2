@@ -22,10 +22,13 @@ tidytext
 readxl
 plot3D
 animation
+knitr
+kableExtra
+ggrepel
+future
 zoo
 xts
 TTR
 quantmod
 xml2
 rvest
-knitr

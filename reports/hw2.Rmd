@@ -50,12 +50,12 @@ library("tidyr")
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
 
-
+# Creation of the "FuzzBizz" operation
 i <- 1
 df <- data.frame()
 while (i<=1000)  {
   if ((i%%5==0) & (i%%3==0)) {
-    df <- rbind(df,c("Fuzzbizz"))
+    df <- rbind(df,c("FuzzBizz"))
   } else if (i%%5==0){
     df <- rbind(df,c("Bizz"))
   } else if (i%%3==0) {
@@ -66,9 +66,13 @@ while (i<=1000)  {
   i <- i+1
 }
 
-df %>%
-  kable(col.names="Number") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size = 7), full_width=FALSE)
+# We decided to display the result of the problem in a table format in order to make the RMarkdown more attractive and professional.
+df2 <- df[1:10,]
+df2 <- rbind(df2,c(df[11:20,]),c(df[21:30,]),c(df[31:40,]),c(df[41:50,]),c(df[51:60,]),c(df[61:70,]),c(df[71:80,]),c(df[81:90,]),c(df[91:100,]))
+
+df2 %>%
+  kable(row.names=FALSE,align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered", font_size = 7))
 
 ```
 
