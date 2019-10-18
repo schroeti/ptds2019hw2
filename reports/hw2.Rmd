@@ -82,7 +82,7 @@ df2 %>%
 
 # Problem 2: Map
 
-```{r,warning = FALSE, message = FALSE, echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.keep='all'}
 
 cities <- tibble(
   name = c("zurich", "bern", "lausanne", "geneva", "basel"),
@@ -111,7 +111,6 @@ switzerland <- world_map@polygons[[40]]@Polygons[[1]]@coords %>% as_tibble()
 ggplot() +
   geom_polygon(data = switzerland, aes(x=V1, y = V2), fill= NA, color = "black")+
   geom_point( data= cities, aes(x=longitude, y=latitude, size=volume, color=language))+
-  #scale_size_continuous(range=c(1,12)) +
   coord_map()+
   theme(panel.background = element_rect(fill= NA, colour="darkgrey", linetype="solid"))+
   xlab("Longitude")+
