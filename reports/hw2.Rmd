@@ -18,6 +18,19 @@ ggmap, rworldmap, rworldxtra, magriits, ptsdpkg, mapproj, plotly, tidytext, read
 
 * The program is slow to run because of the management of a large number of data and of the utilisation of a web scraping method, you can however access the report in its compiled html format in the folder "reports"
 
+* If there is problems with the package ffmpeg with your version of RStudio: 
+
+**Installing in Windows**
+*Download the recent 'static' build from http://ffmpeg.zeranoe.com/builds/*
+*Downloads are compressed with 7zip, so you may need to first install a 7zip decompression program       before you can unpack the installer.*
+*Decompress the package and store contents on your computer (probably in Program Files)*
+*Edit your system path variable to include the path to the directory containing ffmpeg.exe*
+
+**Installing on a Mac**
+*Download most recent build from http://www.evermeet.cx/ffmpeg/*
+*The binary files are compressed with 7zip so may need to install an unarchiving utility: http://wakaba.c3.cx/s/apps/unarchiver.html*
+*Copy ffmpeg to /usr/local/bin/ffmpeg*
+
 
 ```{r,warning = FALSE, message = FALSE, echo=FALSE}
 library("rmdformats")
@@ -276,7 +289,7 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 
 ## Bonus:
 
-```{r , fig.show='animate', interval=.1}
+```{r , fig.show='animate', interval=.1, warning = FALSE, message = FALSE, echo=FALSE}
 
 a <- function(c) {pmat <- scatter3D ( Xtibble$spaceX[1:c] ,
                                       Xtibble$spaceY[1:c] ,
@@ -306,9 +319,9 @@ points( trans3d( c( Xtibble$spaceX[ 1 ] ,
         col = c( "red" , "blue" ), 
         pch = 16)}
 
-a(100)
+a(10000)
 saveGIF(
-  for(i in 2:100){
+  for(i in 2:10000){
     a(i)
   }, movie.name = "simulation.GIF"
 )
@@ -318,8 +331,6 @@ saveGIF(
 ![](simulation.GIF)
 
  
-
-
 # Problem 4: Portfolio construction
 
 To construct the portfolio we need first to extract the stock data from internet. 
