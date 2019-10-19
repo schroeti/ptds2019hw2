@@ -593,15 +593,23 @@ df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifel
 
 
 ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
-  scale_color_discrete(name = NULL, labels = c("Autre Portfolio", "Min variance Portfolio")) +
-  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+ ylab("Return")+xlab("Standard-deviation")+
+  scale_alpha_manual(values = c(0.01,1), guide=FALSE)+
   ggtitle("Return and SD of all portfolios with a weight distribution of \n  0.4 and 0.6 for each stock respectively")+
   theme(plot.title = element_text(hjust = 0.5))+
   geom_label(label = df$Portfolio, 
     nudge_x = 0.00 , nudge_y = 0.0002, 
     check_overlap = F, size = 2,
-    color = "#00AFBB",fontface = "bold")+
-    geom_point()
+    color = "coral3",fontface = "bold")+
+    geom_point()+
+  scale_color_manual(values=c("#00AFBB", "coral3"),labels = c("Possible Portfolio", "Min-variance Portfolio") )+
+  xlab("Investement Daily Risk")+
+  ylab("Investement Daily Expected Return")+
+  theme(legend.position = c(0.8, 0.8),
+        legend.title = element_blank())+
+   theme( panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),axis.line = element_line(colour = "black")
+  )
+
 
 ```
 
