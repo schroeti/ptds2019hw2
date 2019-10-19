@@ -353,7 +353,7 @@ SP500_symbol <- SP500_symbol[1:504]
 SP500_symbol <- gsub(".","-",SP500_symbol,fixed=T)
 
 kable(as_tibble(head(SP500_symbol)))%>%
-  kable_styling(position = "center")
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
 
 ```
@@ -394,14 +394,14 @@ return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))]
 
 
 kable(as_tibble(head(return.stock[,1:6])))%>%
-  kable_styling(position = "center")
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
 ```
 Here are few columns of the extracted datas. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the sp500 less than 3 years ago. 
 
 
 
-```{r, cache=TRUE,echo= FALSE, warning=FALSE}
+```{r, cache=TRUE,echo= FALSE, warning=FALSE, fig.keep='all', resuls='hide'}
 
 return.stock <- data.frame(return.stock)
 
@@ -432,7 +432,7 @@ cov.return<-cbind("Company.1"=rep(colnames(return.stock), ncol(return.stock)) ,g
 return.clean <- left_join(mean.return,sd.return) %>% left_join(cov.return) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
 
 kable(as_tibble(head(return.clean[,])))%>%
-  kable_styling(position = "center")
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
 
 ```
@@ -462,7 +462,6 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
                              2*x*(1-x)*return.clean.matrix[i,5])}
 
 
-#daily_return <- cbind(return.clean[,1:2],setNames(data.frame(matrix(ncol = 11, nrow = nrow(return.clean))), as.character(sigma)))
 
 
 ```
