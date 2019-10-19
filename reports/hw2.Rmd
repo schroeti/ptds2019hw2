@@ -384,8 +384,14 @@ return.stock <- cbind(return.stock, stock_price)
 remove(list= SP500_symbol[i])
 }
 
-#remove columns that contains NA
+
+#Sometimes there is bug in the scrapping and there is duplicated date so we first remove it 
+return.stock <- return.stock[!duplicated(index(return.stock)),]
+
+
+#remove columns that contains aome NA
 return.stock <-return.stock[ , !apply(return.stock,2,function(x) any(is.na(x)))] 
+
 
 kable(as_tibble(head(return.stock[,1:6])))%>%
   kable_styling(position = "center")
@@ -419,7 +425,7 @@ sd.return<- sd.return %>% rename(
     )
 
 cov.return <- data.frame(cov(return.stock))
-cov.return<-cbind("Company.1"=rep(colnames(return.stock), 499) ,gather(cov.return,"Company.2", "Cov", na.rm = FALSE, convert = FALSE))
+cov.return<-cbind("Company.1"=rep(colnames(return.stock), ncol(return.stock)) ,gather(cov.return,"Company.2", "Cov", na.rm = FALSE, convert = FALSE))
 
 
 #We merge all clean database 
@@ -566,9 +572,6 @@ lowerSD.portfolio <- All.portfolio.long[All.portfolio.long[,5] == min(All.portfo
 lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Company.1)
 
 
-
-kable(round(lowerSD.portfolio$SD, digits = 4)*1000000)%>%
-  kable_styling(position = "center")
 
 ```
 
