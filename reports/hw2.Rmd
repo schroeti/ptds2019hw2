@@ -285,7 +285,7 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 ```
 
 
-## Bonus:
+## Bonus :
 
 ``` {r,warning = FALSE, message = FALSE, echo=FALSE}
 #bonus <- function(c) {pmat <- scatter3D ( Xtibble$spaceX[1:c] ,
@@ -399,7 +399,7 @@ Here are few columns of the extracted data. We can notice that each column is a 
 
 
 
-```{r, cache=TRUE,echo= FALSE, warning=FALSE, include=FALSE ,fig.keep='all'}
+```{r, cache=TRUE,echo= FALSE, warning=FALSE}
 
 return.stock <- data.frame(return.stock)
 
@@ -427,7 +427,7 @@ cov.return<-cbind("Company.1"=rep(colnames(return.stock), ncol(return.stock)) ,g
 
 
 #We merge all clean database 
-return.clean <- left_join(mean.return,sd.return) %>% left_join(cov.return) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
+return.clean <- left_join(mean.return,sd.return, by = c("Company.1", "Company.2")) %>% left_join(cov.return, by = c("Company.1", "Company.2")) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
 
 kable(as_tibble(head(return.clean[,])))%>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
@@ -464,7 +464,7 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 
 ```
 
-For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)`rows the package future was used to distribute the calculation amongst different cores. 
+For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)` rows the package future was used to distribute the calculation amongst different cores. 
 
 ```{r, cache=TRUE, echo= FALSE, warning=FALSE}
 
@@ -612,7 +612,7 @@ ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
 ```
 
 
-After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviation of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 4)`%. 
+After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviation of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 5)`%. 
 
 With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
 
