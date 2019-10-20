@@ -327,8 +327,10 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 ```
 This is a short video, which shows how a random walk evolve through time, in this case for the 100 first iterations.
 
+<center>
 ![](simulation.GIF)
- 
+</center>
+
 # Problem 4: Portfolio construction
 
 To construct the portfolio we need first to extract the stock data from internet. 
