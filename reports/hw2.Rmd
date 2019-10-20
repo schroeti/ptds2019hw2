@@ -285,7 +285,7 @@ points(trans3d(c(Xtibble$spaceX[1],Xtibble$spaceX[B+1]),
 ```
 
 
-##Bonus
+## Bonus:
 
 ``` {r,warning = FALSE, message = FALSE, echo=FALSE}
 #bonus <- function(c) {pmat <- scatter3D ( Xtibble$spaceX[1:c] ,
@@ -399,7 +399,7 @@ Here are few columns of the extracted data. We can notice that each column is a 
 
 
 
-```{r, cache=TRUE,echo= FALSE, warning=FALSE, results='hide',fig.keep='all'}
+```{r, cache=TRUE,echo= FALSE, warning=FALSE, include=FALSE ,fig.keep='all'}
 
 return.stock <- data.frame(return.stock)
 
