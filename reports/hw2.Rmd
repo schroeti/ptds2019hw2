@@ -319,9 +319,9 @@ points( trans3d( c( Xtibble$spaceX[ 1 ] ,
         col = c( "red" , "blue" ), 
         pch = 16)}
 
-a(10000)
+a(100)
 saveGIF(
-  for(i in 2:10000){
+  for(i in 2:100){
     a(i)
   }, movie.name = "simulation.GIF"
 )
