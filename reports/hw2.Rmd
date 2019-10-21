@@ -333,9 +333,13 @@ This is a short video, which shows how a random walk evolve through time, in thi
 
 # Problem 4: Portfolio construction
 
+
+## Data extraction 
+
 To construct the portfolio we need first to extract the stock data from internet. 
 
 We first extract the SP500 index tickers from Wikipedia. 
+
 ```{r, warning=FALSE, message = FALSE, echo=FALSE }
 
 sp500 <- read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
@@ -359,10 +363,9 @@ kable(as_tibble(head(SP500_symbol)))%>%
 ```
 Here are the first 6 extracted tickers. We can notice that there is `r length(SP500_symbol)` and not 500. This is because there is more than 500 companies listed on the SP500. 
 
+We then use those tickers to extract stocks price data from Yahoo. For our model only the daily change in percentage is relevant. So we will exctract only those.
 
-
-We then use those tickers to extract stocks price data from Yahoo. For our model only the daily change in percentage is relevant. So we will exctract only those. 
-```{r, warning=FALSE, message = FALSE, echo=FALSE, cache = TRUE, dependson=SP500_symbol }
+```{r, warning=FALSE, message = FALSE, echo=FALSE, cache = TRUE}
 
 # Specify timing
 tot_length <- 3 * 365
@@ -397,9 +400,10 @@ kable(as_tibble(head(return.stock[,1:6])))%>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
 ```
+
 Here are few columns of the extracted data. We can notice that each column is a particular stock and each row is a particular day. The dataframe is only composed of `r ncol(return.stock)` instead of `r length(SP500_symbol)` because some tickers were deleted due to the fact that after scrapping they contained some NA entries. This is because some companies were listed on the SP500 less than 3 years ago. 
 
-
+## Data preparation for computation 
 
 ```{r, cache=TRUE,echo= FALSE, warning=FALSE}
 
@@ -429,6 +433,7 @@ cov.return<-cbind("Company.1"=rep(colnames(return.stock), ncol(return.stock)) ,g
 
 
 #We merge all clean database 
+
 return.clean <- left_join(mean.return,sd.return, by = c("Company.1", "Company.2")) %>% left_join(cov.return, by = c("Company.1", "Company.2")) %>% filter(Company.1!=Company.2) %>% dplyr::distinct(Cov, .keep_all = TRUE) #delete double entries. 
 
 kable(as_tibble(head(return.clean[,])))%>%
@@ -465,6 +470,8 @@ risk <- function(i,x){sqrt(return.clean.matrix[i,3]^2*x^2+return.clean.matrix[i,
 
 
 ```
+
+## Data processing 
 
 For the heavy calculation of running the function 11 times over all the `r nrow(return.clean.matrix)` rows the package future was used to distribute the calculation amongst different cores. 
 
@@ -554,27 +561,32 @@ final.sd <- rbind(a,b,c)
 
 ```
 
+## Result 
 
 ```{r, cache=TRUE, echo= FALSE, warning=FALSE}
 
 
 All.portfolio <- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Return" = final.return, "Sd" = final.sd)
-
 names(All.portfolio) <- c("company.1", "company.2", paste0("R",".",sigma),paste0("SD",".",sigma))
 
 
-All.portfolio.long <- cbind(gather(All.portfolio[,1:13],Weight.Company.1 , Return , R.0:R.1, factor_key=TRUE),  "SD" =gather(All.portfolio[,c(1:2,14:24)],Portfolio, SD , SD.0:SD.1, factor_key=TRUE)[,4])  #put in long format to find min. 
+#Put the table in long format to find min amonste all portfolios 
 
+All.portfolio.long <- cbind(gather(All.portfolio[,1:13],Weight.Company.1 , Return , R.0:R.1, factor_key=TRUE),  "SD" =gather(All.portfolio[,c(1:2,14:24)],Portfolio, SD , SD.0:SD.1, factor_key=TRUE)[,4])   
+
+# Extract the lowest portfolio 
 
 lowerSD.portfolio <- All.portfolio.long[All.portfolio.long[,5] == min(All.portfolio.long[,5]),]
-
 lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Company.1)
 
+
+kable(as_tibble(lowerSD.portfolio))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>% footnote(general = "The less risky portfolio", general_title = "")
 
 
 ```
 
-
+Here is finally the portfolio with the smaller SD. Now we will plot it against all the other portfolios with the same weight. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.keep='all'}
 
@@ -583,9 +595,15 @@ lowerSD.portfolio$Weight.Company.1 <-gsub('R.', '', lowerSD.portfolio$Weight.Com
 theme_set(theme_bw())
 
 
+#exctract portoflio with weight 0.4-0.6
 
+df<- data.frame("company.1" = return.clean$Company.1,
+                "company.2" = return.clean$Company.2, 
+                "Variance" = final.sd[,(as.numeric(lowerSD.portfolio["Weight.Company.1"])*10+1)], 
+                "ret" = final.return[,(as.numeric(lowerSD.portfolio["Weight.Company.1"])*10+1)]
+                )
 
-df<- data.frame("company.1" = return.clean$Company.1,"company.2" = return.clean$Company.2, "Variance" = final.sd[,5], "ret" = final.return[,5])
+#set up the table for the graph with a min column and the name of the min portfolio
 
 df %>% mutate("Min" = (min(Variance) == Variance ))  %>% mutate(Portfolio = ifelse(Min == TRUE, as.character(paste(company.1,company.2,sep = "-")), NA)) -> df
 
@@ -614,7 +632,7 @@ ggplot(df, aes(Variance, ret, color = Min, alpha = Min))+
 ```
 
 
-After anaylsis the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviation of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r round(lowerSD.portfolio$Return, digits = 5)`%. 
+After anaylsis, the portfolio with the lower standard-deviation is composed of the ticker `r lowerSD.portfolio$company.1` and `r lowerSD.portfolio$company.2` with a weight of `r lowerSD.portfolio$Weight.Company.1` and `r (1-as.numeric(lowerSD.portfolio$Weight.Company.1))` respectively. The standard deviation of this portfolio is `r round(lowerSD.portfolio$SD, digits = 4)`% and the daily expected return is `r format(round(lowerSD.portfolio$Return, digits = 5), scientific=FALSE)`%. 
 
 With one milion invested in this portfolio the daily expected return would be `r round(lowerSD.portfolio$Return, digits = 4)*1000000`$. 
 
